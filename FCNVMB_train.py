@@ -21,19 +21,41 @@ from PathConfig import *
 from LibConfig import *
 
 ################################################
+########    LOADING TRAINING DATA       ########
+################################################
+print('***************** Loading Training DataSet *****************')
+data_set = "petrobras"
+if data_set == "others":
+    train_set,label_set,data_dsp_dim,label_dsp_dim  = DataLoad_Train(train_size=TrainSize,train_data_dir=train_data_dir, \
+                                                                     data_dim=DataDim,in_channels=Inchannels, \
+                                                                     model_dim=ModelDim,data_dsp_blk=data_dsp_blk, \
+                                                                     label_dsp_blk=label_dsp_blk,start=1, \
+                                                                     datafilename=datafilename,dataname=dataname, \
+                                                                     truthfilename=truthfilename,truthname=truthname)
+    # Change data type (numpy --> tensor)
+    train        = data_utils.TensorDataset(torch.from_numpy(train_set),torch.from_numpy(label_set))
+    train_loader = data_utils.DataLoader(train,batch_size=BatchSize,shuffle=True)
+
+else:
+    train_loader, dim_A, dim_B  = get_petrobras_loader(main_dir)
+    data_dsp_dim, label_dsp_dim = (dim_A[1],dim_A[2]), (dim_B[1],dim_B[2])
+    Inchannels = dim_A[0]
+    Nclasses = dim_B[0]
+
+################################################
 ########             NETWORK            ########
 ################################################
 
-# Here indicating the GPU you want to use. if you don't have GPU, just leave it.
-cuda_available = torch.cuda.is_available()
-device         = torch.device("cuda" if cuda_available else "cpu")
-
-net = UnetModel(n_classes=Nclasses,in_channels=Inchannels,is_deconv=True,is_batchnorm=True) 
+net = UnetModel(n_classes=Nclasses,in_channels=Inchannels,is_deconv=True,is_batchnorm=True)
 if torch.cuda.is_available():
     net.cuda()
 
 # Optimizer we want to use
 optimizer = torch.optim.Adam(net.parameters(),lr=LearnRate)
+
+# Here indicating the GPU you want to use. if you don't have GPU, just leave it.
+cuda_available = torch.cuda.is_available()
+device = torch.device("cuda" if cuda_available else "cpu")
 
 # If ReUse, it will load saved model from premodelfilepath and continue to train
 if ReUse:
@@ -41,25 +63,9 @@ if ReUse:
     print('')
     premodel_file = models_dir + premodelname + '.pkl'
     ##Load generator parameters
-    net  = net.load_state_dict(torch.load(premodel_file))
-    net  = net.to(device)
-    print('Finish downloading:',str(premodel_file))
-    
-################################################
-########    LOADING TRAINING DATA       ########
-################################################
-print('***************** Loading Training DataSet *****************')
-train_set,label_set,data_dsp_dim,label_dsp_dim  = DataLoad_Train(train_size=TrainSize,train_data_dir=train_data_dir, \
-                                                                 data_dim=DataDim,in_channels=Inchannels, \
-                                                                 model_dim=ModelDim,data_dsp_blk=data_dsp_blk, \
-                                                                 label_dsp_blk=label_dsp_blk,start=1, \
-                                                                 datafilename=datafilename,dataname=dataname, \
-                                                                 truthfilename=truthfilename,truthname=truthname)
-# Change data type (numpy --> tensor)
-train        = data_utils.TensorDataset(torch.from_numpy(train_set),torch.from_numpy(label_set))
-train_loader = data_utils.DataLoader(train,batch_size=BatchSize,shuffle=True)
-
-
+    net = net.load_state_dict(torch.load(premodel_file))
+    net = net.to(device)
+    print('Finish downloading:', str(premodel_file))
 
 ################################################
 ########            TRAINING            ########
@@ -97,8 +103,9 @@ for epoch in range(Epochs):
         net.train()
         
         # Reshape data size
-        images = images.view(BatchSize,Inchannels,data_dsp_dim[0],data_dsp_dim[1])
-        labels = labels.view(BatchSize,Nclasses,label_dsp_dim[0],label_dsp_dim[1])
+        #print(images.shape, labels.shape)
+        #images = images.view(BatchSize,Inchannels,data_dsp_dim[0],data_dsp_dim[1])
+        #labels = labels.view(BatchSize,Nclasses,label_dsp_dim[0],label_dsp_dim[1])
         images = images.to(device)
         labels = labels.to(device)
         

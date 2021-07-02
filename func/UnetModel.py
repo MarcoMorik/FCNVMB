@@ -101,7 +101,7 @@ class  UnetModel(nn.Module):
         up3    = self.up3(down3, up4)
         up2    = self.up2(down2, up3)
         up1    = self.up1(down1, up2)
-        up1    = up1[:,:,1:1+label_dsp_dim[0],1:1+label_dsp_dim[1]].contiguous()
+        up1    = up1[:,:,:1+label_dsp_dim[0],:1+label_dsp_dim[1]].contiguous()
         
         return self.final(up1)
     
@@ -110,7 +110,7 @@ class  UnetModel(nn.Module):
           for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, sqrt(2. / n))
+                m.weight.data.normal_(0, (2. / n)**0.5)
                 if m.bias is not None:
                     m.bias.data.zero_()
             elif isinstance(m, nn.BatchNorm2d):
@@ -118,7 +118,7 @@ class  UnetModel(nn.Module):
                 m.bias.data.zero_()
             elif isinstance(m,nn.ConvTranspose2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, sqrt(2. / n))
+                m.weight.data.normal_(0, (2. / n)**0.5)
                 if m.bias is not None:
                     m.bias.data.zero_()
 

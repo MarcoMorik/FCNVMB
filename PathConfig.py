@@ -37,9 +37,12 @@ truthname     = tagV1
 ###################################################
 ####                   PATHS                  #####
 ###################################################
- 
-main_dir   = '/home/yfs1/Code/pytorch/FCNVMB/'     # Replace your main path here
 
+homedir = os.environ['HOME']
+if homedir == "/home/marco":
+    main_dir = '/home/marco/Documents/FCNVMB/'     # Replace your main path here
+else:
+    main_dir = homedir + "/FCNVMB/"
 ## Check the main directory
 if len(main_dir) == 0:
     raise Exception('Please specify path to correct directory!')
