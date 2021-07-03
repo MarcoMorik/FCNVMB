@@ -46,4 +46,4 @@ LearnRate         = 1e-3      # Learning rate
 Nclasses          = 3        # Number of output channels
 Inchannels        = 4        # Number of input channels, i.e. the number of shots
 SaveEpoch         = 20        
-DisplayStep       = 2         # Number of steps till outputting stats
+DisplayStep       = 1000         # Number of steps till outputting stats

@@ -117,7 +117,7 @@ for epoch in range(Epochs):
         
         # Calculate the MSE
         loss    = F.mse_loss(outputs,labels,reduction='sum')/(label_dsp_dim[0]*label_dsp_dim[1]*BatchSize)
-        
+
         if np.isnan(float(loss.item())):
             raise ValueError('loss is nan while training')
             

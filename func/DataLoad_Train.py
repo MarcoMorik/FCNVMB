@@ -100,7 +100,7 @@ def normalize_data(data, mean=None, std=None):
         std = np.std(data)
     data = (data - mean) / std
     return data
-def data_generator(data_A, data_B, dim_A, dim_B, matching_pairs=True, batch_size=1):
+def data_generator(data_A, data_B, dim_A, dim_B, matching_pairs=True, batch_size=1, iter=16000):
     print(np.shape(data_A), np.shape(data_B))
     def get_indx():
 
@@ -108,10 +108,10 @@ def data_generator(data_A, data_B, dim_A, dim_B, matching_pairs=True, batch_size
         iy = np.random.randint(0, data_shape[1], batch_size)
         iz = np.random.randint(0, data_shape[2] - dim_A[2], batch_size)
         return ix, iy, iz
-
+    counter = 0
     while True:
         # choose random instances
-
+        counter += 1
         data_shape = np.shape(data_A)[1:]
         ix, iy, iz = get_indx()
         # retrieve selected images
@@ -123,5 +123,8 @@ def data_generator(data_A, data_B, dim_A, dim_B, matching_pairs=True, batch_size
             ix, iy, iz = get_indx()
 
         B = np.asarray([data_B[:, x:x + dim_B[1], y, z: z + dim_B[2]] for x, y, z in zip(ix, iy, iz)])
+        if counter %iter == 0:
+            return torch.Tensor(A), torch.Tensor(B)
+        else:
+            yield torch.Tensor(A), torch.Tensor(B)
 
-        yield torch.Tensor(A), torch.Tensor(B)
